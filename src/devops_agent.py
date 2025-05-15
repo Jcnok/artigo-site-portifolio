@@ -1,4 +1,4 @@
-# src/devops_agent.py
+# devops_agent.py
 import os
 import git
 import yaml
@@ -9,7 +9,6 @@ from langchain.agents import AgentExecutor, create_openai_functions_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.tools import BaseTool
 
-# Carrega variáveis de ambiente do arquivo .env na raiz do projeto
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
 
 class DevOpsAgent:
@@ -30,23 +29,17 @@ class DevOpsAgent:
     def _setup_tools(self):
         return [
             CommitChangesTool(),
-            SetupGitHubActionsTool(),
-            PushToGitHubTool()
+            PushToGitHubTool(),
+            InfraAsCodeTool()
         ]
     
     def _setup_agent(self):
         prompt = ChatPromptTemplate.from_messages([
             ("system", """Você é um especialista em DevOps e automação de CI/CD.
-            Fluxo de trabalho obrigatório:
-            1. Verificar alterações no diretório 'site/'
-            2. Commits semânticos com Conventional Commits
-            3. Push para branch 'main'
-            4. Deploy automático para branch 'githubpages'
-            
-            Padrões requeridos:
-            - Mensagens de commit em português
-            - Formato: tipo(escopo): descrição
-            - Deploy apenas do conteúdo do diretório 'site/'"""),
+            Responsabilidades principais:
+            1. Gerenciar commits semânticos
+            2. Realizar push para branch main
+            3. Garantir integridade do repositório"""),
             ("human", "{input}"),
             MessagesPlaceholder(variable_name="agent_scratchpad"),
         ])
@@ -96,73 +89,6 @@ class CommitChangesTool(BaseTool):
         except Exception as e:
             return f"Erro no commit: {str(e)}"
 
-class SetupGitHubActionsTool(BaseTool):
-    name: str = "setup_github_actions"
-    description: str = "Configura CI/CD para GitHub Pages na branch githubpages"
-    
-    def _run(self) -> str:
-        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        workflow_dir = os.path.join(project_root, '.github', 'workflows')
-        os.makedirs(workflow_dir, exist_ok=True)
-
-        workflow = {
-            'name': 'Deploy to GitHub Pages',
-            'on': {
-                'push': {
-                    'branches': ['main'],
-                    'paths': ['site/**']
-                }
-            },
-            'env': {
-                'GH_TOKEN': '${{ secrets.GITHUB_TOKEN }}',
-                'TZ': 'America/Sao_Paulo'
-            },
-            'jobs': {
-                'build-and-deploy': {
-                    'runs-on': 'ubuntu-latest',
-                    'permissions': {
-                        'contents': 'write',
-                        'pages': 'write',
-                        'id-token': 'write'
-                    },
-                    'steps': [
-                        {
-                            'name': 'Checkout',
-                            'uses': 'actions/checkout@v4',
-                            'with': {
-                                'persist-credentials': False
-                            }
-                        },
-                        {
-                            'name': 'Configurar GitHub Pages',
-                            'uses': 'actions/configure-pages@v3',
-                            'with': {
-                                'branch': 'githubpages',
-                                'source-path': 'site/'
-                            }
-                        },
-                        {
-                            'name': 'Fazer Upload do Site',
-                            'uses': 'actions/upload-pages-artifact@v2',
-                            'with': {
-                                'path': 'site/'
-                            }
-                        },
-                        {
-                            'name': 'Fazer Deploy',
-                            'uses': 'actions/deploy-pages@v2'
-                        }
-                    ]
-                }
-            }
-        }
-        
-        workflow_path = os.path.join(workflow_dir, 'deploy.yml')
-        with open(workflow_path, 'w') as f:
-            yaml.safe_dump(workflow, f, sort_keys=False, default_flow_style=False)
-            
-        return f"Workflow de deploy configurado em: {workflow_path}"
-
 class PushToGitHubTool(BaseTool):
     name: str = "push_to_github"
     description: str = "Envia alterações para a branch main do GitHub"
@@ -185,6 +111,75 @@ class PushToGitHubTool(BaseTool):
             return "Push realizado com sucesso para a branch main"
         except Exception as e:
             return f"Erro no push: {str(e)}"
+
+class InfraAsCodeTool(BaseTool):
+    name: str = "infra_as_code"
+    description: str = "Configuração idempotente de CI/CD"
+    
+    def _workflow_version(self):
+        return "1.2.0"
+    
+    def _create_workflow(self, workflow_dir):
+        workflow_content = {
+            'name': 'Deploy to GitHub Pages',
+            'on': {
+                'push': {
+                    'branches': ['main'],
+                    'paths': ['site/**']
+                }
+            },
+            'env': {
+                'GH_TOKEN': '${{ secrets.GITHUB_TOKEN }}',
+                'TZ': 'America/Sao_Paulo'
+            },
+            'jobs': {
+                'build-and-deploy': {
+                    'runs-on': 'ubuntu-latest',
+                    'permissions': {
+                        'contents': 'write',
+                        'pages': 'write',
+                        'id-token': 'write'
+                    },
+                    'steps': [
+                        {
+                            'name': 'Checkout',
+                            'uses': 'actions/checkout@v4'
+                        },
+                        {
+                            'name': 'Deploy to GitHub Pages',
+                            'uses': 'JamesIves/github-pages-deploy-action@v4',
+                            'with': {
+                                'folder': 'site'
+                            }
+                        }
+                    ]
+                }
+            },
+            'metadata': {
+                'version': self._workflow_version(),
+                'created_by': 'AI DevOps Agent'
+            }
+        }
+        
+        workflow_path = os.path.join(workflow_dir, 'deploy.yml')
+        with open(workflow_path, 'w') as f:
+            yaml.safe_dump(workflow_content, f, sort_keys=False, default_flow_style=False)
+    
+    def _run(self) -> str:
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        workflow_dir = os.path.join(project_root, '.github', 'workflows')
+        os.makedirs(workflow_dir, exist_ok=True)
+        
+        workflow_path = os.path.join(workflow_dir, 'deploy.yml')
+        
+        if os.path.exists(workflow_path):
+            with open(workflow_path, 'r') as f:
+                existing_config = yaml.safe_load(f)
+                if existing_config.get('metadata', {}).get('version') == self._workflow_version():
+                    return "Workflow já está atualizado"
+        
+        self._create_workflow(workflow_dir)
+        return "Workflow de deploy configurado/atualizado com sucesso"
 
 if __name__ == "__main__":
     agent = DevOpsAgent()

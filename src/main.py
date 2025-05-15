@@ -2,9 +2,28 @@
 from site_creator_agent import SiteCreatorAgent
 from devops_agent import DevOpsAgent
 from dotenv import load_dotenv
+import os
+
+def validate_environment():
+    required_vars = [
+        "AZURE_OPENAI_API_KEY",
+        "GITHUB_USERNAME",
+        "GITHUB_EMAIL",
+        "GITHUB_TOKEN",
+        "GITHUB_REPO"
+    ]
+    missing = [var for var in required_vars if not os.getenv(var)]
+    if missing:
+        print(f"⚠️ Variáveis de ambiente obrigatórias não definidas: {', '.join(missing)}")
+        print("Por favor, configure-as no arquivo .env e tente novamente.")
+        return False
+    return True
 
 def main():
     load_dotenv()
+    
+    if not validate_environment():
+        return
     
     print("🚀 Iniciando sistema de portfólio automatizado com IA")
     
@@ -32,6 +51,7 @@ def main():
     
     print("\n✅ Sistema de portfólio automatizado concluído com sucesso!")
     print("Seu site está pronto e configurado para deploy automático no GitHub Pages.")
+    print(f"Acesse: https://{os.getenv('GITHUB_USERNAME')}.github.io/{os.getenv('GITHUB_REPO')}")
 
 if __name__ == "__main__":
     main()

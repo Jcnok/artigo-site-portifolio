@@ -1,10 +1,6 @@
-// JavaScript para interatividade do portfólio
+// Código JavaScript para interatividade
 
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
-    form.addEventListener('submit', function(event) {
-        event.preventDefault(); // Previne o envio do formulário
-        alert('Mensagem enviada!'); // Simulação de envio
-        form.reset(); // Reseta o formulário
-    });
+document.querySelector('form').addEventListener('submit', function(e) {
+    e.preventDefault(); // Evita o envio padrão do formulário
+    alert('Mensagem enviada!'); // Exibe um alerta de confirmação
 });
