@@ -1,33 +1,15 @@
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: site
 name: Deploy to GitHub Pages
 'on':
   push:
     branches:
-    - main
-    paths:
-    - site/**
-env:
-  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  TZ: America/Sao_Paulo
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pages: write
-      id-token: write
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        persist-credentials: false
-    - name: Configurar GitHub Pages
-      uses: actions/configure-pages@v3
-      with:
-        branch: githubpages
-        source-path: site/
-    - name: Fazer Upload do Site
-      uses: actions/upload-pages-artifact@v2
-      with:
-        path: site/
-    - name: Fazer Deploy
-      uses: actions/deploy-pages@v2
+      - main
