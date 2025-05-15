@@ -1,71 +1,176 @@
-
+# devops_agent.py
 import os
-import base64
-from openai import AzureOpenAI
+import git
+import yaml
+from datetime import datetime
 from dotenv import load_dotenv
+from langchain_openai import AzureChatOpenAI
+from langchain.agents import AgentExecutor, create_openai_functions_agent
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain.tools import BaseTool
 
+# Carrega variáveis de ambiente do arquivo .env
 load_dotenv()
 
-endpoint = os.getenv("AZURE_OPENAI_ENDPOINT", "https://openai-dio-boot-east1.openai.azure.com/")
-deployment = os.getenv("DEPLOYMENT_NAME", "gpt-4o-mini")
-subscription_key = os.getenv("AZURE_OPENAI_API_KEY", "REPLACE_WITH_YOUR_KEY_VALUE_HERE")
-
-# Inicializar o cliente OpenAI do Azure com autenticação baseada em chave
-client = AzureOpenAI(
-    azure_endpoint=endpoint,
-    api_key=subscription_key,
-    api_version="2025-01-01-preview",
-)
-
-# IMAGE_PATH = "YOUR_IMAGE_PATH"
-# encoded_image = base64.b64encode(open(IMAGE_PATH, 'rb').read()).decode('ascii')
-
-#Preparar o prompt de chat
-chat_prompt = [
-    {
-        "role": "system",
-        "content": [
-            {
-                "type": "text",
-                "text": "Você é um assistente de IA que ajuda as pessoas a encontrar informações."
-            }
-        ]
-    },
-    {
-        "role": "user",
-        "content": [
-            {
-                "type": "text",
-                "text": "Quem descobriu o Brasil?"
-            }
-        ]
-    },
-    {
-        "role": "assistant",
-        "content": [
-            {
-                "type": "text",
-                "text": "Oi! Como posso ajudar você hoje?"
-            }
-        ]
-    }
-]
-
-# Incluir resultado de fala se a fala estiver habilitada
-messages = chat_prompt
-
-# Gerar a conclusão
-completion = client.chat.completions.create(
-    model=deployment,
-    messages=messages,
-    max_tokens=800,
-    temperature=0.7,
-    top_p=0.95,
-    frequency_penalty=0,
-    presence_penalty=0,
-    stop=None,
-    stream=False
-)
-
-print(completion.to_json())
+class DevOpsAgent:
+    def __init__(self):
+        self.llm = self._setup_llm()
+        self.tools = self._setup_tools()
+        self.agent = self._setup_agent()
+        
+    def _setup_llm(self):
+        return AzureChatOpenAI(
+            openai_api_version=os.getenv("OPENAI_API_VERSION", "2024-05-01-preview"),
+            azure_deployment=os.getenv("DEPLOYMENT_NAME"),
+            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+            api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+            temperature=0.7
+        )
     
+    def _setup_tools(self):
+        return [
+            CommitChangesTool(),
+            SetupGitHubActionsTool(),
+            PushToGitHubTool()
+        ]
+    
+    def _setup_agent(self):
+        prompt = ChatPromptTemplate.from_messages([
+            ("system", """Você é um especialista em DevOps e automação de CI/CD.
+            Seu trabalho é gerenciar commits semânticos e deploy automático seguindo estas regras:
+            
+            1. Commits devem seguir Conventional Commits: tipo(escopo): descrição
+            2. Deploy automático via GitHub Actions para GitHub Pages
+            3. Verificar alterações antes de comitar
+            4. Mensagens de commit em português seguindo padrões internacionais"""),
+            ("human", "{input}"),
+            MessagesPlaceholder(variable_name="agent_scratchpad"),
+        ])
+        
+        agent = create_openai_functions_agent(self.llm, self.tools, prompt)
+        return AgentExecutor.from_agent_and_tools(
+            agent=agent,
+            tools=self.tools,
+            verbose=True
+        )
+    
+    def run(self, query):
+        return self.agent.invoke({"input": query})
+
+class CommitChangesTool(BaseTool):
+    name: str = "commit_changes"
+    description: str = "Adiciona e comita mudanças seguindo Conventional Commits"
+    
+    def _generate_commit_message(self, repo):
+        diff = repo.git.diff('HEAD')
+        message_type = "chore"
+        
+        if any(f in diff for f in ['content/', 'docs/']):
+            message_type = "docs(content)"
+        elif any(f in diff for f in ['styles/', 'components/']):
+            message_type = "feat(ui)"
+        elif 'devops_agent.py' in diff:
+            message_type = "chore(devops)"
+            
+        timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+        return f"{message_type}: atualização automática {timestamp}"
+
+    def _run(self) -> str:
+        try:
+            repo = git.Repo(os.getcwd())
+            
+            if not repo.is_dirty() and not repo.untracked_files:
+                return "Nenhuma alteração detectada para commit"
+
+            commit_message = self._generate_commit_message(repo)
+            
+            repo.git.add(all=True)
+            repo.git.config('user.name', os.getenv("GITHUB_USERNAME"))
+            repo.git.config('user.email', os.getenv("GITHUB_EMAIL"))
+            repo.git.commit('-m', commit_message)
+            return f"Commit realizado: {commit_message}"
+        except Exception as e:
+            return f"Erro no commit: {str(e)}"
+
+class SetupGitHubActionsTool(BaseTool):
+    name: str = "setup_github_actions"
+    description: str = "Configura CI/CD para GitHub Pages"
+    
+    def _run(self) -> str:
+        # Caminho absoluto para a raiz do projeto
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        workflow_dir = os.path.join(project_root, '.github', 'workflows')
+        os.makedirs(workflow_dir, exist_ok=True)
+
+        workflow = {
+            'name': 'Deploy Site',
+            'on': {
+                'push': {
+                    'branches': ['main'],
+                    'paths': ['site/**']
+                }
+            },
+            'env': {
+                'GH_TOKEN': '${{ secrets.GITHUB_TOKEN }}',
+                'TZ': 'America/Sao_Paulo'
+            },
+            'jobs': {
+                'deploy': {
+                    'runs-on': 'ubuntu-latest',
+                    'permissions': {
+                        'contents': 'write',
+                        'pages': 'write',
+                        'id-token': 'write'
+                    },
+                    'steps': [
+                        {
+                            'name': 'Checkout',
+                            'uses': 'actions/checkout@v4'
+                        },
+                        {
+                            'name': 'Setup Pages',
+                            'uses': 'actions/configure-pages@v3'
+                        },
+                        {
+                            'name': 'Deploy to Pages',
+                            'uses': 'actions/deploy-pages@v2',
+                            'with': {
+                                'artifact_name': 'site',
+                                'previews': 'true'
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+        
+        workflow_path = os.path.join(workflow_dir, 'deploy.yml')
+        with open(workflow_path, 'w') as f:
+            yaml.safe_dump(workflow, f, sort_keys=False)
+            
+        return f"Workflow criado em: {workflow_path}"
+
+class PushToGitHubTool(BaseTool):
+    name: str = "push_to_github"
+    description: str = "Envia alterações para o repositório remoto"
+    
+    def _run(self) -> str:
+        try:
+            repo = git.Repo(os.getcwd())
+            
+            # Configura URL do remote com token de acesso
+            remote_url = f"https://{os.getenv('GITHUB_USERNAME')}:{os.getenv('GITHUB_TOKEN')}@github.com/{os.getenv('GITHUB_USERNAME')}/{os.getenv('GITHUB_REPO')}.git"
+            
+            if 'origin' not in repo.remotes:
+                repo.create_remote('origin', remote_url)
+            else:
+                repo.remote('origin').set_url(remote_url)
+            
+            repo.git.push('--set-upstream', 'origin', 'main')
+            return "Push realizado com sucesso para o GitHub"
+        except Exception as e:
+            return f"Erro no push: {str(e)}"
+
+if __name__ == "__main__":
+    agent = DevOpsAgent()
+    agent.run("Configurar pipeline de deploy automático")

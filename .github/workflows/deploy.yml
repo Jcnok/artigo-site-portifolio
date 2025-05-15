@@ -1,15 +1,164 @@
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Deploy to GitHub Pages
-      uses: JamesIves/github-pages-deploy-action@v4
-      with:
-        folder: site
-name: Deploy to GitHub Pages
-'on':
-  push:
-    branches:
-    - main
+# devops_agent.py
+import os
+import git
+import yaml
+from datetime import datetime
+from langchain_openai import AzureChatOpenAI
+from langchain.agents import AgentExecutor, create_openai_functions_agent
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain.tools import BaseTool
+
+class DevOpsAgent:
+    def __init__(self):
+        self.llm = self._setup_llm()
+        self.tools = self._setup_tools()
+        self.agent = self._setup_agent()
+        
+    def _setup_llm(self):
+        return AzureChatOpenAI(
+            openai_api_version="2025-01-01-preview",
+            azure_deployment=os.getenv("DEPLOYMENT_NAME"),
+            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+            api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+            temperature=0.7
+        )
+    
+    def _setup_tools(self):
+        return [
+                  CommitChangesTool(),
+                  SetupGitHubActionsTool(),
+                  PushToGitHubTool()
+                ]
+    
+    def _setup_agent(self):
+        prompt = ChatPromptTemplate.from_messages([
+            ("system", """Você é um especialista em DevOps e automação de CI/CD.
+            Seu trabalho é gerenciar commits semânticos e deploy automático seguindo estas regras:
+            
+            1. Commits devem seguir Conventional Commits: tipo(escopo): descrição
+            2. Deploy automático via GitHub Actions para GitHub Pages
+            3. Verificar alterações antes de comitar
+            4. Mensagens de commit em português seguindo padrões internacionais"""),
+            ("human", "{input}"),
+            MessagesPlaceholder(variable_name="agent_scratchpad"),
+        ])
+        
+        agent = create_openai_functions_agent(self.llm, self.tools, prompt)
+        return AgentExecutor.from_agent_and_tools(
+            agent=agent,
+            tools=self.tools,
+            verbose=True
+        )
+    
+    def run(self, query):
+        return self.agent.invoke({"input": query})
+
+class CommitChangesTool(BaseTool):
+    name: str = "commit_changes"
+    description: str = "Adiciona e comita mudanças seguindo Conventional Commits"
+    
+    def _generate_commit_message(self, repo):
+        diff = repo.git.diff('HEAD')
+        message_type = "chore"
+        
+        if 'site/content' in diff:
+            message_type = "docs(content)"
+        elif 'site/styles' in diff:
+            message_type = "feat(ui)"
+        elif 'devops_agent.py' in diff:
+            message_type = "chore(devops)"
+            
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        return f"{message_type}: atualização automática {timestamp}"
+
+    def _run(self) -> str:
+        try:
+            repo = git.Repo(os.getcwd())
+            
+            if not repo.is_dirty() and not repo.untracked_files:
+                return "Nenhuma alteração detectada para commit"
+
+            commit_message = self._generate_commit_message(repo)
+            
+            repo.git.add(all=True)
+            repo.git.config('user.name', os.getenv("GITHUB_USERNAME"))
+            repo.git.config('user.email', os.getenv("GITHUB_EMAIL"))
+            repo.git.commit('-m', commit_message)
+            return f"Commit realizado: {commit_message}"
+        except Exception as e:
+            return f"Erro no commit: {str(e)}"
+
+class SetupGitHubActionsTool(BaseTool):
+    name: str = "setup_github_actions"
+    description: str = "Configura CI/CD para GitHub Pages"
+    
+    def _run(self) -> str:
+        workflow_dir = os.path.join('.github', 'workflows')
+        os.makedirs(workflow_dir, exist_ok=True)
+
+        workflow = {
+            'name': 'Deploy Site',
+            'on': {
+                'push': {
+                    'branches': ['main'],
+                    'paths': ['site/**']
+                }
+            },
+            'env': {
+                'GH_TOKEN': '${{ secrets.GITHUB_TOKEN }}',
+                'TZ': 'America/Sao_Paulo'
+            },
+            'jobs': {
+                'deploy': {
+                    'runs-on': 'ubuntu-latest',
+                    'permissions': {
+                        'contents': 'write',
+                        'pages': 'write',
+                        'id-token': 'write'
+                    },
+                    'steps': [
+                        {
+                            'name': 'Checkout',
+                            'uses': 'actions/checkout@v4'
+                        },
+                        {
+                            'name': 'Setup Pages',
+                            'uses': 'actions/configure-pages@v3'
+                        },
+                        {
+                            'name': 'Deploy to Pages',
+                            'uses': 'actions/deploy-pages@v2',
+                            'with': {
+                                'artifact_name': 'site',
+                                'previews': 'true'
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+        
+        with open(os.path.join(workflow_dir, 'deploy.yml'), 'w') as f:
+            yaml.safe_dump(workflow, f, sort_keys=False)
+            
+        return "GitHub Actions configurado para deploy contínuo"
+
+class PushToGitHubTool(BaseTool):
+    name: str = "push_to_github"
+    description: str = "Envia alterações para o repositório remoto"
+    
+    def _run(self) -> str:
+        try:
+            repo = git.Repo(os.getcwd())
+            origin = repo.remote(name='origin')
+            
+            if not any(repo.iter_commits('main')):
+                return "Nenhum commit para enviar"
+                
+            push_result = origin.push(refspec='main:main')[0]
+            
+            if push_result.flags & push_result.ERROR:
+                return f"Erro no push: {push_result.summary}"
+            return "Push realizado com sucesso"
+        except Exception as e:
+            return f"Erro no push: {str(e)}"
