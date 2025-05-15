@@ -1,11 +1,16 @@
-# devops_agent.py
+# src/devops_agent.py
 import os
 import git
 import yaml
+from datetime import datetime
+from dotenv import load_dotenv
 from langchain_openai import AzureChatOpenAI
 from langchain.agents import AgentExecutor, create_openai_functions_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.tools import BaseTool
+
+# Carrega variáveis de ambiente do arquivo .env na raiz do projeto
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
 
 class DevOpsAgent:
     def __init__(self):
@@ -15,7 +20,7 @@ class DevOpsAgent:
         
     def _setup_llm(self):
         return AzureChatOpenAI(
-            openai_api_version="2025-01-01-preview",
+            openai_api_version=os.getenv("OPENAI_API_VERSION", "2024-05-01-preview"),
             azure_deployment=os.getenv("DEPLOYMENT_NAME"),
             azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
             api_key=os.getenv("AZURE_OPENAI_API_KEY"),
@@ -24,7 +29,6 @@ class DevOpsAgent:
     
     def _setup_tools(self):
         return [
-            InitGitTool(),
             CommitChangesTool(),
             SetupGitHubActionsTool(),
             PushToGitHubTool()
@@ -33,9 +37,16 @@ class DevOpsAgent:
     def _setup_agent(self):
         prompt = ChatPromptTemplate.from_messages([
             ("system", """Você é um especialista em DevOps e automação de CI/CD.
-            Seu trabalho é configurar um sistema de controle de versão e deploy automático para um site de portfólio.
+            Fluxo de trabalho obrigatório:
+            1. Verificar alterações no diretório 'site/'
+            2. Commits semânticos com Conventional Commits
+            3. Push para branch 'main'
+            4. Deploy automático para branch 'githubpages'
             
-            Use as ferramentas disponíveis para inicializar o Git, comitar mudanças, configurar GitHub Actions e fazer push para o GitHub."""),
+            Padrões requeridos:
+            - Mensagens de commit em português
+            - Formato: tipo(escopo): descrição
+            - Deploy apenas do conteúdo do diretório 'site/'"""),
             ("human", "{input}"),
             MessagesPlaceholder(variable_name="agent_scratchpad"),
         ])
@@ -50,92 +61,133 @@ class DevOpsAgent:
     def run(self, query):
         return self.agent.invoke({"input": query})
 
-class InitGitTool(BaseTool):
-    name: str = "initialize_git"
-    description: str = "Inicializa um repositório Git local"
-    
-    def _run(self) -> str:
-        try:
-            repo = git.Repo.init(os.getcwd())
-            return "Repositório Git inicializado com sucesso"
-        except Exception as e:
-            return f"Erro ao inicializar repositório Git: {str(e)}"
-
 class CommitChangesTool(BaseTool):
     name: str = "commit_changes"
-    description: str = "Adiciona e comita mudanças no repositório Git"
+    description: str = "Adiciona e comita mudanças seguindo Conventional Commits"
     
-    def _run(self, message: str = "Atualização automática do site de portfólio") -> str:
+    def _generate_commit_message(self, repo):
+        diff = repo.git.diff('HEAD')
+        message_type = "chore"
+        
+        if any(f in diff for f in ['site/content/', 'site/docs/']):
+            message_type = "docs(content)"
+        elif any(f in diff for f in ['site/styles/', 'site/components/']):
+            message_type = "feat(ui)"
+        elif 'src/devops_agent.py' in diff:
+            message_type = "chore(devops)"
+            
+        timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+        return f"{message_type}: atualização automática {timestamp}"
+
+    def _run(self) -> str:
         try:
             repo = git.Repo(os.getcwd())
+            
+            if not repo.is_dirty() and not repo.untracked_files:
+                return "Nenhuma alteração detectada para commit"
+
+            commit_message = self._generate_commit_message(repo)
+            
             repo.git.add(all=True)
             repo.git.config('user.name', os.getenv("GITHUB_USERNAME"))
             repo.git.config('user.email', os.getenv("GITHUB_EMAIL"))
-            repo.git.commit('-m', message)
-            return f"Mudanças commitadas com sucesso: {message}"
+            repo.git.commit('-m', commit_message)
+            return f"Commit realizado: {commit_message}"
         except Exception as e:
-            return f"Erro ao comitar mudanças: {str(e)}"
+            return f"Erro no commit: {str(e)}"
 
 class SetupGitHubActionsTool(BaseTool):
     name: str = "setup_github_actions"
-    description: str = "Configura o GitHub Actions para CI/CD"
+    description: str = "Configura CI/CD para GitHub Pages na branch githubpages"
     
     def _run(self) -> str:
-        # Obter o diretório raiz do projeto (um nível acima do diretório src)
         project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         workflow_dir = os.path.join(project_root, '.github', 'workflows')
-        os.makedirs(workflow_dir, exist_ok=True)        
-        
-        workflow_content = {
+        os.makedirs(workflow_dir, exist_ok=True)
+
+        workflow = {
             'name': 'Deploy to GitHub Pages',
             'on': {
                 'push': {
-                    'branches': ['main']
+                    'branches': ['main'],
+                    'paths': ['site/**']
                 }
+            },
+            'env': {
+                'GH_TOKEN': '${{ secrets.GITHUB_TOKEN }}',
+                'TZ': 'America/Sao_Paulo'
             },
             'jobs': {
                 'build-and-deploy': {
                     'runs-on': 'ubuntu-latest',
+                    'permissions': {
+                        'contents': 'write',
+                        'pages': 'write',
+                        'id-token': 'write'
+                    },
                     'steps': [
                         {
                             'name': 'Checkout',
-                            'uses': 'actions/checkout@v3'
+                            'uses': 'actions/checkout@v4',
+                            'with': {
+                                'persist-credentials': False
+                            }
                         },
                         {
-                            'name': 'Deploy to GitHub Pages',
-                            'uses': 'JamesIves/github-pages-deploy-action@v4',
+                            'name': 'Configurar GitHub Pages',
+                            'uses': 'actions/configure-pages@v3',
                             'with': {
-                                'folder': 'site'
+                                'branch': 'githubpages',
+                                'source-path': 'site/'
                             }
+                        },
+                        {
+                            'name': 'Fazer Upload do Site',
+                            'uses': 'actions/upload-pages-artifact@v2',
+                            'with': {
+                                'path': 'site/'
+                            }
+                        },
+                        {
+                            'name': 'Fazer Deploy',
+                            'uses': 'actions/deploy-pages@v2'
                         }
                     ]
                 }
             }
         }
         
-        with open(os.path.join(workflow_dir, 'deploy.yml'), 'w') as f:
-            yaml.dump(workflow_content, f, default_flow_style=False)
-        
-        return "GitHub Actions configurado com sucesso para deploy automático"
+        workflow_path = os.path.join(workflow_dir, 'deploy.yml')
+        with open(workflow_path, 'w') as f:
+            yaml.safe_dump(workflow, f, sort_keys=False, default_flow_style=False)
+            
+        return f"Workflow de deploy configurado em: {workflow_path}"
 
 class PushToGitHubTool(BaseTool):
     name: str = "push_to_github"
-    description: str = "Envia as mudanças para o GitHub"
+    description: str = "Envia alterações para a branch main do GitHub"
     
-    def _run(self, remote_url: str = None) -> str:
-        if not remote_url:
-            remote_url = f"https://{os.getenv('GITHUB_TOKEN')}@github.com/{os.getenv('GITHUB_USERNAME')}/{os.getenv('GITHUB_REPO')}.git"
+    def _run(self) -> str:
         try:
             repo = git.Repo(os.getcwd())
+            remote_url = (
+                f"https://{os.getenv('GITHUB_USERNAME')}:{os.getenv('GITHUB_TOKEN')}"
+                f"@github.com/{os.getenv('GITHUB_USERNAME')}/{os.getenv('GITHUB_REPO')}.git"
+            )
             
-            # Verificar se o remote já existe
-            try:
-                repo.git.remote('add', 'origin', remote_url)
-            except git.GitCommandError:
-                # Remote já existe, atualizando URL
-                repo.git.remote('set-url', 'origin', remote_url)
+            if 'origin' not in repo.remotes:
+                origin = repo.create_remote('origin', remote_url)
+            else:
+                origin = repo.remotes.origin
+                origin.set_url(remote_url)
             
-            repo.git.push('--set-upstream', 'origin', 'main')
-            return "Mudanças enviadas para o GitHub com sucesso"
+            origin.push(refspec='main:main', force=False)
+            return "Push realizado com sucesso para a branch main"
         except Exception as e:
-            return f"Erro ao enviar mudanças para o GitHub: {str(e)}"
+            return f"Erro no push: {str(e)}"
+
+if __name__ == "__main__":
+    agent = DevOpsAgent()
+    print("Iniciando DevOps Agent...")
+    result = agent.run("Configurar pipeline completo com deploy na branch githubpages")
+    print("\nResultado final:", result)
