@@ -1,6 +1,6 @@
 # 🚀 Portfólio Automatizado com Python + IA  
 *Crie, Personalize e Publique Seu Portfólio em Minutos!*  
-<img src="img/cover.png" referrerpolicy="same-origin" style="display: block; object-fit: cover; border-radius: 0px; width: 100%; height: 80vh; opacity: 1; object-position: center 50%;">
+![cover](img/cover.png)
   
 *Um assistente de IA cuida do código, você cuida da criatividade!*  
 
