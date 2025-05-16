@@ -1,40 +1,47 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Scroll suave para links
-    document.querySelectorAll('nav a').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            target.scrollIntoView({ behavior: 'smooth' });
-        });
-    });
+// Seleciona todos os links de navegação
+const links = document.querySelectorAll('nav a');
 
-    // Modal dinâmico
-    const modals = document.querySelectorAll('.modal');
-    const cards = document.querySelectorAll('.card');
-    const closeModal = document.querySelectorAll('.close');
-
-    cards.forEach(card => {
-        card.addEventListener('click', () => {
-            const modalId = card.getAttribute('data-modal');
-            document.getElementById(modalId).style.display = 'block';
-        });
-    });
-
-    closeModal.forEach(close => {
-        close.addEventListener('click', () => {
-            close.parentElement.parentElement.style.display = 'none';
-        });
-    });
-
-    // Validação do formulário
-    const form = document.getElementById('contact-form');
-    form.addEventListener('submit', (e) => {
+// Adiciona evento de clique para cada link
+links.forEach(link => {
+    link.addEventListener('click', function(e) {
         e.preventDefault(); // Previne o comportamento padrão
-        const feedback = document.getElementById('feedback');
-        feedback.innerText = 'Enviando...';
-        setTimeout(() => {
-            feedback.innerText = 'Mensagem enviada com sucesso!';
-            form.reset();
-        }, 2000);
+        const targetId = this.getAttribute('href'); // Obtém o ID do destino
+        const targetElement = document.querySelector(targetId); // Seleciona o elemento alvo
+        targetElement.scrollIntoView({ behavior: 'smooth' }); // Rolagem suave
     });
+});
+
+// Função para abrir o modal
+function openModal(content) {
+    const modal = document.createElement('div');
+    modal.classList.add('modal');
+    modal.innerHTML = `<div class='modal-content'><span class='close'>&times;</span><p>${content}</p></div>`;
+    document.body.appendChild(modal);
+
+    // Fecha o modal ao clicar no X
+    modal.querySelector('.close').onclick = function() {
+        modal.remove();
+    };
+}
+
+// Adiciona evento de clique nos cards de projeto
+const projetoCards = document.querySelectorAll('.projeto-card');
+projetoCards.forEach(card => {
+    card.addEventListener('click', function() {
+        const content = this.getAttribute('data-modal-content');
+        openModal(content);
+    });
+});
+
+// Validação do formulário
+const contactForm = document.getElementById('contact-form');
+const formFeedback = document.getElementById('form-feedback');
+contactForm.addEventListener('submit', function(e) {
+    e.preventDefault(); // Previne o comportamento padrão
+
+    // Simulação de envio com setTimeout
+    setTimeout(() => {
+        formFeedback.textContent = 'Mensagem enviada com sucesso!';
+        contactForm.reset();
+    }, 2000);
 });

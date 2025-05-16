@@ -1,41 +1,50 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
+/* Variáveis CSS */
 :root {
     --primary-color: #2ecc71;
-    --secondary-color: #3498db;
+    --secondary-color: #1abc9c;
     --background-color: #ecf0f1;
-    --text-color: #2c3e50;
+    --text-color: #34495e;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 body {
     font-family: Arial, sans-serif;
     background-color: var(--background-color);
     color: var(--text-color);
+    line-height: 1.6;
 }
 
 header {
     position: fixed;
-    top: 0;
     width: 100%;
     background: white;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    z-index: 10;
-    padding: 10px 20px;
+    z-index: 1000;
 }
 
-header .logo {
-    font-size: 24px;
+.logo {
+    padding: 10px;
+    font-size: 1.5em;
     font-weight: bold;
 }
 
-nav ul {
-    list-style: none;
+nav {
     display: flex;
-    gap: 20px;
+    justify-content: flex-end;
+}
+
+nav ul {
+    list-style-type: none;
+    display: flex;
+}
+
+nav ul li {
+    margin: 0 15px;
 }
 
 nav a {
@@ -43,35 +52,39 @@ nav a {
     color: var(--text-color);
 }
 
-.hero-content {
+.hero {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    align-items: center;
     padding: 100px 20px;
-}
-
-.hero-avatar {
-    display: flex;
-    justify-content: center;
     align-items: center;
 }
 
-.avatar {
-    border-radius: 50%;
-    border: 5px solid transparent;
-    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
-    padding: 5px;
+.hero-text {
+    padding: 20px;
 }
 
-.cta {
+.hero-avatar img {
+    border-radius: 50%;
+    border: 10px solid;
+    border-image: linear-gradient(45deg, var(--primary-color), var(--secondary-color)) 1;
+    width: 100%;
+    max-width: 300px;
+}
+
+.cta-button {
     background: var(--primary-color);
     color: white;
     padding: 10px 20px;
     text-decoration: none;
     border-radius: 5px;
+    transition: background 0.3s;
 }
 
-#projetos {
+.cta-button:hover {
+    background: var(--secondary-color);
+}
+
+.projetos {
     padding: 50px 20px;
 }
 
@@ -81,14 +94,25 @@ nav a {
     gap: 20px;
 }
 
-.card {
-    position: relative;
+.projeto-card {
+    background: white;
+    border-radius: 5px;
     overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     transition: transform 0.3s;
 }
 
-.card:hover {
+.projeto-card:hover {
     transform: translateY(-5px);
+}
+
+.projeto-card figure {
+    margin: 0;
+}
+
+.projeto-card img {
+    width: 100%;
+    height: auto;
 }
 
 .tag {
@@ -96,65 +120,64 @@ nav a {
     color: white;
     padding: 5px;
     border-radius: 3px;
-    margin-right: 5px;
+    margin: 5px;
+    display: inline-block;
 }
 
-#contato {
+.contato {
     padding: 50px 20px;
 }
 
-form input, form textarea {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid var(--text-color);
+form {
+    display: flex;
+    flex-direction: column;
 }
 
-.submit {
+form label {
+    margin: 10px 0 5px;
+}
+
+form input, form textarea {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+form button {
+    margin-top: 10px;
+    padding: 10px;
     background: var(--primary-color);
     color: white;
     border: none;
-    padding: 10px 20px;
+    border-radius: 5px;
     cursor: pointer;
+}
+
+form button:hover {
+    background: var(--secondary-color);
 }
 
 footer {
     text-align: center;
     padding: 20px;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
+    background: white;
 }
 
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.5);
+.social-icons a {
+    margin: 0 10px;
+    color: var(--text-color);
 }
 
-.modal-content {
-    background-color: white;
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
-}
-
+/* Media Queries */
 @media (max-width: 768px) {
-    .hero-content {
+    .hero {
         grid-template-columns: 1fr;
     }
+
     .projetos-grid {
         grid-template-columns: 1fr;
     }
 }
-
 @media (min-width: 1200px) {
     .projetos-grid {
         grid-template-columns: repeat(3, 1fr);

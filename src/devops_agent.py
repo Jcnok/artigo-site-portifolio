@@ -155,10 +155,10 @@ class InfraAsCodeTool(BaseTool):
                     ]
                 }
             },
-            'metadata': {
-                'version': self._workflow_version(),
-                'created_by': 'AI DevOps Agent'
-            }
+            #'metadata': {
+            #    'version': self._workflow_version(),
+            #    'created_by': 'AI DevOps Agent'
+            #}
         }
         
         workflow_path = os.path.join(workflow_dir, 'deploy.yml')
