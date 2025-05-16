@@ -1,195 +1,183 @@
-# 🚀 AutoPortfolio: Sistema Automatizado de Portfólio com IA 
+# 🚀 Portfólio Automatizado com Python + IA  
+*Crie, Personalize e Publique Seu Portfólio em Minutos!*  
 
-[![GitHub Actions](https://img.shields.io/github/actions/workflow/status/Jcnok/artigo-site-portifolio/deploy.yml?style=for-the-badge&logo=githubactions)](https://github.com/Jcnok/artigo-site-portifolio/actions)
-[![Licença MIT](https://img.shields.io/badge/Licença-MIT-blue.svg?style=for-the-badge)](LICENSE)
+  
+*Um assistente de IA cuida do código, você cuida da criatividade!*  
 
-![Capa do Projeto](img/cover.png)
+---
 
-## 📚 Índice
-- [🚀 AutoPortfolio: Sistema Automatizado de Portfólio com IA](#-autoportfolio-sistema-automatizado-de-portfólio-com-ia)
-  - [📚 Índice](#-índice)
-  - [✨ Sobre o Projeto](#-sobre-o-projeto)
+## 📌 Índice  
+- [🚀 Portfólio Automatizado com Python + IA](#-portfólio-automatizado-com-python--ia)
+  - [📌 Índice](#-índice)
+  - [🌟 Sobre o Projeto](#-sobre-o-projeto)
   - [🎯 Funcionalidades](#-funcionalidades)
-  - [⚙️ Arquitetura do Sistema](#️-arquitetura-do-sistema)
+  - [🏗️ Arquitetura](#️-arquitetura)
   - [📂 Estrutura de Arquivos](#-estrutura-de-arquivos)
-  - [🔧 Pré-requisitos](#-pré-requisitos)
-  - [🛠️ Instalação Passo a Passo](#️-instalação-passo-a-passo)
-    - [1. Clone o Repositório](#1-clone-o-repositório)
-    - [2. Configure o Ambiente](#2-configure-o-ambiente)
-    - [3. Instale Dependências](#3-instale-dependências)
-  - [🚦 Como Usar](#-como-usar)
-    - [Execução Completa](#execução-completa)
-    - [Acesso ao Site](#acesso-ao-site)
-  - [🧠 Diagrama do Sistema](#-diagrama-do-sistema)
+  - [🔑 Configuração de Chaves](#-configuração-de-chaves)
+  - [🛠️ Instalação](#️-instalação)
+    - [Pré-requisitos](#pré-requisitos)
+    - [Clone e Configuração](#clone-e-configuração)
+    - [Instale as Dependências](#instale-as-dependências)
+    - [Configure o GitHub](#configure-o-github)
+      - [Permissões do Workflow:](#permissões-do-workflow)
+      - [GitHub Pages:](#github-pages)
+  - [🚀 Como Usar](#-como-usar)
+    - [Execute o Script Principal:](#execute-o-script-principal)
+    - [Acesse Seu Portfólio:](#acesse-seu-portfólio)
+    - [Faça Alterações e Commite:](#faça-alterações-e-commite)
   - [🤝 Contribuindo](#-contribuindo)
-  - [📄 Licença](#-licença)
+  - [📜 Licença](#-licença)
+
+---
+
+## 🌟 Sobre o Projeto  
+**Automatize a criação de portfólios profissionais** usando Python, GitHub Actions e IA! Este projeto é perfeito para:  
+- 🎓 **Estudantes** que querem um portfólio moderno sem codar manualmente.  
+- 👩‍💻 **Devs** que desejam demonstrar habilidades em automação e DevOps.  
+- 🚀 **Profissionais** buscando otimizar tempo com CI/CD e commits semânticos.  
+
+**Tecnologias:** Python, LangChain, GitHub Actions, HTML5, CSS3, OpenAI.  
 
 [⬆ Voltar ao Índice](#-índice)
 
 ---
 
-## ✨ Sobre o Projeto
-![Demo](img/demo.gif)
-
-Solução inteligente que combina **IA Generativa** com **DevOps** para criar e implantar automaticamente portfólios profissionais. Desenvolvido para a 27ª Competição de Artigos da DIO, utiliza:
-
-- 🤖 Azure OpenAI para geração de código
-- ⚡ LangChain para orquestração de agentes
-- 🔄 GitHub Actions para CI/CD automático
-- 🎨 GitHub Pages para hospedagem gratuita
-
-[⬆ Voltar ao Índice](#-índice)
-
----
-
-## 🎯 Funcionalidades
-| Recurso               | Descrição                                          | Emoji |
-|-----------------------|---------------------------------------------------|-------|
-| Geração de Site       | Cria HTML/CSS/JS automaticamente                  | 🎨    |
-| Commits Semânticos    | Mensagens seguindo Conventional Commits           | 📝    |
-| Deploy Automático     | CI/CD configurado com GitHub Actions              | 🔄    |
-| Design Responsivo     | Layout que se adapta a qualquer dispositivo       | 📱    |
-| Segurança             | Credenciais armazenadas em variáveis de ambiente  | 🔒    |
+## 🎯 Funcionalidades  
+- ✅ **Geração Automática de Sites**  
+  - HTML semântico, CSS responsivo e JS interativo.  
+  - SEO integrado com meta tags e otimização para mecanismos de busca.  
+- 🤖 **Automação DevOps**  
+  - Deploy contínuo no GitHub Pages via GitHub Actions.  
+  - Commits semânticos automatizados com mensagens inteligentes.  
+- 🔧 **Personalização Fácil**  
+  - Edite cores, conteúdos e adicione projetos em minutos.  
+  - Suporte a temas claros/escuros via variáveis CSS.  
 
 [⬆ Voltar ao Índice](#-índice)
 
 ---
 
-## ⚙️ Arquitetura do Sistema
-
+## 🏗️ Arquitetura  
 ```mermaid
 graph TD
-A[Usuário] --> B[Agente Criador]
-B --> C[HTML/CSS/JS]
-A --> D[Agente DevOps]
-D --> E[GitHub Actions]
-E --> F[GitHub Pages]
-C --> F
-style B fill:#4CAF50,stroke:#388E3C
-style D fill:#2196F3,stroke:#1976D2
+    A[Usuário] --> B[Executa main.py]
+    B --> C[SiteCreatorAgent]
+    C --> D[Gera HTML/CSS/JS]
+    B --> E[DevOpsAgent]
+    E --> F[Configura GitHub Actions]
+    E --> G[Faz Commit + Push]
+    G --> H[GitHub Pages]
+    H --> I[Site Publicado]
 ```
-
 
 [⬆ Voltar ao Índice](#-índice)
 
 ---
 
 ## 📂 Estrutura de Arquivos
+
 ```
 artigo-site-portifolio/
-├── .github/
-│ └── workflows/
-│   └── deploy.yml # Configuração do CI/CD
-├── src/
-│ ├── main.py # Script principal
-│ ├── devops_agent.py # Agente de DevOps
-│ └── site_creator_agent.py# Agente de Criação
-├── site/
-│ ├── index.html # Página principal
-│ ├── css/
-│ │ └── style.css # Estilos
-│ └── js/
-│   └── main.js # Interatividade
-├── img/ # Imagens e GIFs
-├── .env # Credenciais
-└── README.md # Este arquivo
+├── src/                   # Agentes Python
+│   ├── site_creator_agent.py
+│   ├── devops_agent.py
+│   ├── main.py
+│   └── commit.py
+├── site/                  # Site gerado automáticamente
+│   ├── index.html
+│   ├── css/
+│   └── js/
+├── .github/workflows/     # Pipeline de Deploy gerado automáticamente
+├── img/                   # Imagens/GIFs
+├── .env-example           # Modelo de variáveis
+├── requirements.txt       # Dependências
+└── README.md              # Você está aqui!
 ```
 
 [⬆ Voltar ao Índice](#-índice)
 
 ---
 
-## 🔧 Pré-requisitos
-- ✅ Conta no [Azure](https://azure.microsoft.com)
-- ✅ Conta no [GitHub](https://github.com)
-- ✅ [Python 3.10+](https://python.org)
-- ✅ [Git](https://git-scm.com)
+## 🔑 Configuração de Chaves
 
-**Verifique as instalações:**
-```bash
-python --version
+Renomeie `.env-example` para `.env` e preencha com suas credenciais:
 
-git --version
+```ini
+# .env
+AZURE_OPENAI_API_KEY="sua_chave"                                  # Obtenha em: https://azure.microsoft.com/
+AZURE_OPENAI_ENDPOINT="https://seu-endpoint.openai.azure.com/"    # exemplo 
+OPENAI_API_VERSION="2025-01-01-preview"                           # exemplo
+DEPLOYMENT_NAME="gpt-4o-mini"                                     # exemplo 
+GITHUB_TOKEN="ghp_sua chave"                                      # Obtenha em: https://github.com/settings/tokens
+GITHUB_USERNAME="Jcnok"                                           # Seu username do GitHub
+GITHUB_EMAIL="email@gmail.com"                                    # Email vinculado ao GitHub
+GITHUB_REPO="artigo-site-portifolio"                              # Nome do repositório
 ```
 
 [⬆ Voltar ao Índice](#-índice)
 
 ---
 
-## 🛠️ Instalação Passo a Passo
+## 🛠️ Instalação
 
-### 1. Clone o Repositório
+### Pré-requisitos
+
+- Python 3.11+
+- Git
+- Conta no GitHub
+- Conta na Azure OpenAI
+
+### Clone e Configuração
 
 ```bash
-git clone https://github.com/Jcnok/artigo-site-portifolio.git
+git clone https://github.com/Jcnok/artigo-site-portifolio
 cd artigo-site-portifolio
+
+# Crie um ambiente virtual
+python -m venv .venv
+source .venv/bin/activate  # No Windows: .venv\Scripts\activate
 ```
+### Instale as Dependências
 
-
-### 2. Configure o Ambiente
-
-```bash
-cp .env.example .env
-```
-**Edite com suas credenciais**
-
-```bash
-nano .env # Ou abra no editor preferido
-```
-
-
-### 3. Instale Dependências
 ```bash
 pip install -r requirements.txt
 ```
-```bash
-python -m venv .venv
-```
-```bash
-source .venv/bin/activate # Linux/Mac
+### Configure o GitHub
 
-.venv\Scripts\activate # Windows
-```
+#### Permissões do Workflow:
 
+Acesse:
+`https://github.com/seu-usuario/artigo-site-portifolio/settings/actions`
+→ Workflow Permissions → Marque **Read and write permissions**.
+
+#### GitHub Pages:
+
+Vá em:
+`https://github.com/seu-usuario/artigo-site-portifolio/settings/pages`
+→ Branch: **gh-pages** → Pasta: `/` (root).
 
 [⬆ Voltar ao Índice](#-índice)
 
 ---
 
-## 🚦 Como Usar
+## 🚀 Como Usar
 
-### Execução Completa
+### Execute o Script Principal:
+
 ```bash
 python src/main.py
 ```
+Isso gera o site, configura o CI/CD e publica automaticamente!
 
-### Acesso ao Site
-Após o deploy automático, acesse:
+### Acesse Seu Portfólio:
+
+Disponível em:
+`https://seu-usuario.github.io/artigo-site-portifolio/`
+
+### Faça Alterações e Commite:
+
 ```bash
-https://[SEU_USUARIO].github.io/[SEU_REPOSITORIO]
-```
-
-
-[⬆ Voltar ao Índice](#-índice)
-
----
-
-## 🧠 Diagrama do Sistema
-```mermaid	
-sequenceDiagram
-participant User
-participant AgentCriador
-participant AgentDevOps
-participant GitHub
-User->>AgentCriador: Solicita criação do site
-AgentCriador->>AzureOpenAI: Gera código HTML/CSS/JS
-AzureOpenAI-->>AgentCriador: Retorna código gerado
-AgentCriador->>User: Exibe resultado
-
-User->>AgentDevOps: Solicita deploy
-AgentDevOps->>GitHub: Configura CI/CD
-GitHub->>GitHub: Executa workflow
-GitHub-->>User: Notifica status do deploy
+python src/commit.py  # Detecta mudanças e commita com mensagem semântica!
 ```
 
 [⬆ Voltar ao Índice](#-índice)
@@ -197,27 +185,33 @@ GitHub-->>User: Notifica status do deploy
 ---
 
 ## 🤝 Contribuindo
-1. **Faça Fork** do projeto
-2. Crie uma branch:  
-   `git checkout -b feature/nova-feature`
-3. Commit suas mudanças:  
-   `git commit -m "feat: minha nova feature incrível"`
-4. Push para a branch:  
-   `git push origin feature/nova-feature`
-5. Abra um **Pull Request**
+
+1. Faça um Fork do projeto.
+2. Crie uma Branch:
+
+```bash
+git checkout -b feat/minha-feature
+```
+
+3. Commita suas Mudanças:
+
+```bash
+python src/commit.py  # Ou use commits convencionais
+```
+
+4. Envie um Pull Request!
 
 [⬆ Voltar ao Índice](#-índice)
 
 ---
 
-## 📄 Licença
-Distribuído sob licença MIT. Veja [LICENSE](LICENSE) para detalhes.
+## 📜 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para detalhes.
+
+Feito com 💙 por Julio Okuda | [Meu LinkedIn](https://www.linkedin.com/in/juliookuda/)
+🌟 Dúvidas? Abra uma issue ou contribua para melhorar o projeto!
 
 [⬆ Voltar ao Índice](#-índice)
 
 ---
-
-**Desenvolvido com ❤️ por [Jcnok](https://github.com/Jcnok)**  
-*27ª Competição de Artigos da DIO*
-
-
