@@ -211,7 +211,3 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para de
 
 Feito com 💙 por Julio Okuda | [Meu LinkedIn](https://www.linkedin.com/in/juliookuda/)
 🌟 Dúvidas? Abra uma issue ou contribua para melhorar o projeto!
-
-[⬆ Voltar ao Índice](#-índice)
-
----
