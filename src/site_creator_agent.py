@@ -4,99 +4,39 @@ from langchain_openai import AzureChatOpenAI
 from langchain.agents import AgentExecutor, create_openai_functions_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.tools import BaseTool
-from typing import List, Optional
+from typing import List, Optional, Any
+from pydantic import Field
 
 class SiteCreatorAgent:
     def __init__(self):
         self.llm = self._setup_llm()
         self.tools = self._setup_tools()
-        self.agent = self._setup_agent()        
-    def _setup_llm(self):
+        self.agent = self._setup_agent()
+    
+    def _setup_llm(self) -> AzureChatOpenAI:
         return AzureChatOpenAI(
-            openai_api_version="2025-01-01-preview",
+            openai_api_version="2023-05-15",
             azure_deployment=os.getenv("DEPLOYMENT_NAME"),
             azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
             api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-            temperature=0.7
+            temperature=0.3
         )
     
-    def _setup_tools(self):
+    def _setup_tools(self) -> List[BaseTool]:
         return [
-            CreateHTMLTool(),
-            CreateCSSTool(),
-            CreateJSTool()
+            CreateHTMLTool(llm=self.llm),
+            CreateCSSTool(llm=self.llm),
+            CreateJSTool(llm=self.llm)
         ]
     
-    def _setup_agent(self):
+    def _setup_agent(self) -> AgentExecutor:
         prompt = ChatPromptTemplate.from_messages([
-            ("system", """Você é um especialista em desenvolvimento web front-end.
-             Seguintes regras obrigatórias:
-            1. Todas as referências CSS devem usar o caminho `css/style.css`
-            2. Todos os scripts JavaScript devem usar o caminho `js/main.js`
-            3. Uso estrito de tags semânticas HTML5
-            4. Layout 100% responsivo com media queries
-            5. Meta tags otimizadas para SEO
-            ---
-            ## Requisitos Técnicos
-            ### Estrutura de Arquivos
-            ```plaintext
-            ├── index.html
-            ├── css/
-            │    └── style.css
-            └── js/
-                └── main.js
-            Regras de Desenvolvimento
-            HTML Semântico:
-
-            Usar <header>, <main>, <section>, <article>, <footer>
-
-            Navegação com <nav> e links âncora suaves
-
-            Cards de projetos com <article> e <figure>
-
-            CSS Moderno:
-
-            Grid/Flexbox para layouts complexos
-
-            Animações CSS para interações
-
-            Media queries para:
-
-            css
-            @media (max-width: 768px) [ /* Mobile */ ]
-            @media (min-width: 1200px) [ /* Desktop XL */ ]
-            JavaScript Limpo:
-
-            Scroll suave nativo
-
-            Modal dinâmico para projetos
-
-            Validação de formulário com regex
-
-            Seções Obrigatórias
-            1. Cabeçalho Fixo
-                Logo com nome do usuário
-                Menu hamburguer mobile
-                Links âncora suaves (Home/Projetos/Contato)
-
-            2. Seção Hero
-                Layout grid 50/50 (texto + avatar)
-                Avatar circular com borda gradiente
-                Botão CTA "Ver Projetos"
-
-            3. Seção Projetos
-                Grid responsivo (3 colunas desktop → 1 mobile)
-                Cards com:
-                    Imagem placeholder (600x400)
-                    Tags de tecnologia
-                    Modal ao clicar (dados via JSON)
-
-            4. Formulário de Contato
-                Campos: Nome (obrigatório), Email (validação), Mensagem
-                Submit com loader CSS
-                Feedback de envio
-             
-            5. SEO e Acessibilidade"""),
+            ("system", """Você é um gerador especializado em sites de portfólio. Regras absolutas:
+             1. Estrutura semântica HTML5 rigorosa
+             2. CSS em 'css/style.css'
+             3. JavaScript em 'js/main.js'
+             4. Layout responsivo com media queries
+             5. Seguir exatamente o modelo de https://jcnok.github.io/portfolio/"""),
             ("human", "{input}"),
             MessagesPlaceholder(variable_name="agent_scratchpad"),
         ])
@@ -105,85 +45,81 @@ class SiteCreatorAgent:
         return AgentExecutor.from_agent_and_tools(
             agent=agent,
             tools=self.tools,
-            verbose=True
+            verbose=True,
+            handle_parsing_errors=True
         )
     
-    def run(self, query):
+    def run(self, query: str) -> Any:
         return self.agent.invoke({"input": query})
 
 class CreateHTMLTool(BaseTool):
     name: str = "create_html"
-    description: str = "Cria o arquivo HTML principal do site de portfólio"
-    
-    def _run(self, content: Optional[str] = None) -> str:
-        if not content:
-            prompt = """Crie um HTML básico para um site de portfólio profissional com:
-            1. Seções para sobre, projetos, habilidades e contato
-            2. Links corretos para CSS em 'css/style.css'
-            3. Scripts corretos para JavaScript em 'js/main.js'
-            4. Tags semânticas e meta tags para SEO
-            5. Estrutura responsiva usando CSS moderno"""
-            
-            content = self.llm.invoke(prompt).content
-            
-        # Garante os caminhos corretos
-        content = content.replace('href="styles.css"', 'href="css/style.css"')
-        content = content.replace('src="script.js"', 'src="js/main.js"')
-        content = content.replace('href="./styles.css"', 'href="css/style.css"')
-        content = content.replace('src="./script.js"', 'src="js/main.js"')
+    description: str = "Cria o arquivo HTML principal"
+    llm: AzureChatOpenAI = Field(default_factory=AzureChatOpenAI)
 
-        # Verificação pós-criação
-        if 'css/style.css' not in content:
-            content = content.replace('</head>', '<link rel="stylesheet" href="css/style.css"></head>')
+    def _run(self, content: Optional[str] = None, **kwargs: Any) -> str:
+        prompt = """Gere HTML para um portfolio profissional com:
+        1. Header fixo com menu hambúrguer
+        2. Seção Hero com grid 50/50
+        3. Seção Projetos com 3 cards
+        4. Formulário de contato válido
+        5. Links corretos para CSS/JS"""
         
-        if 'js/main.js' not in content:
-            content = content.replace('</body>', '<script src="js/main.js"></script></body>')
-
+        content = self.llm.invoke(prompt).content
+        
+        essential_elements = ['<header', '<section class="hero"', 'projects-grid', '<form id="contact-form"']
+        for elem in essential_elements:
+            if elem not in content:
+                content = content.replace('<body>', f'<body>\n<!-- {elem} missing -->')
+        
         os.makedirs("site", exist_ok=True)
-        with open("site/index.html", "w") as f:
+        with open("site/index.html", "w", encoding="utf-8") as f:
             f.write(content)
-        return "Arquivo HTML criado com sucesso em site/index.html"
+        return "HTML gerado com sucesso"
 
 class CreateCSSTool(BaseTool):
     name: str = "create_css"
-    description: str = "Cria o arquivo CSS para estilizar o site de portfólio"
-    
-    def _run(self, content: Optional[str] = None) -> str:
-        if not content:
-            content = """/* Estilos principais */
-:root {
-    --primary-color: #2A2A2A;
-    --secondary-color: #F5F5F5;
-}
+    description: str = "Cria o arquivo CSS de estilos"
+    llm: AzureChatOpenAI = Field(default_factory=AzureChatOpenAI)
 
-body {
-    font-family: 'Segoe UI', sans-serif;
-    margin: 0;
-    padding: 0;
-}"""
+    def _run(self, content: Optional[str] = None, **kwargs: Any) -> str:
+        prompt = """Gere CSS para:
+        1. Design responsivo mobile-first
+        2. Grid/Flexbox layouts
+        3. Animações suaves
+        4. Media queries para mobile
+        5. Estilos do modelo de referência"""
+        
+        content = self.llm.invoke(prompt).content
+        
+        required_styles = ['.projects-grid', '@media', '.hero', 'transform']
+        for style in required_styles:
+            if style not in content:
+                content += f"\n/* {style} missing */"
         
         os.makedirs("site/css", exist_ok=True)
-        with open("site/css/style.css", "w") as f:
+        with open("site/css/style.css", "w", encoding="utf-8") as f:
             f.write(content)
-        return "Arquivo CSS criado com sucesso em site/css/style.css"
+        return "CSS gerado com sucesso"
 
 class CreateJSTool(BaseTool):
     name: str = "create_js"
-    description: str = "Cria o arquivo JavaScript para adicionar interatividade ao site"
-    
-    def _run(self, content: Optional[str] = None) -> str:
-        if not content:
-            content = """// Animação suave de scroll
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        document.querySelector(this.getAttribute('href')).scrollIntoView({
-            behavior: 'smooth'
-        });
-    });
-});"""
+    description: str = "Cria o arquivo JavaScript"
+    llm: AzureChatOpenAI = Field(default_factory=AzureChatOpenAI)
+
+    def _run(self, content: Optional[str] = None, **kwargs: Any) -> str:
+        prompt = """Gere JavaScript para:
+        1. Scroll suave
+        2. Validação de formulário
+        3. Carregamento dinâmico de projetos
+        4. Interações do menu mobile"""
+        
+        content = self.llm.invoke(prompt).content
+        
+        if 'addEventListener' not in content:
+            content = "// Event listeners\n" + content
         
         os.makedirs("site/js", exist_ok=True)
-        with open("site/js/main.js", "w") as f:
+        with open("site/js/main.js", "w", encoding="utf-8") as f:
             f.write(content)
-        return "Arquivo JavaScript criado com sucesso em site/js/main.js"
+        return "JS gerado com sucesso"
