@@ -10,8 +10,7 @@ class SiteCreatorAgent:
     def __init__(self):
         self.llm = self._setup_llm()
         self.tools = self._setup_tools()
-        self.agent = self._setup_agent()
-        
+        self.agent = self._setup_agent()        
     def _setup_llm(self):
         return AzureChatOpenAI(
             openai_api_version="2025-01-01-preview",
@@ -31,12 +30,73 @@ class SiteCreatorAgent:
     def _setup_agent(self):
         prompt = ChatPromptTemplate.from_messages([
             ("system", """Você é um especialista em desenvolvimento web front-end.
-            Regras obrigatórias:
-            1. Todas as referências CSS devem usar o caminho 'css/style.css'
-            2. Todos os scripts JavaScript devem usar o caminho 'js/main.js'
-            3. Usar tags semânticas HTML5
-            4. Layout responsivo com media queries
-            5. Meta tags para SEO e otimização de mecanismos de busca"""),
+             Seguintes regras obrigatórias:
+            1. Todas as referências CSS devem usar o caminho `css/style.css`
+            2. Todos os scripts JavaScript devem usar o caminho `js/main.js`
+            3. Uso estrito de tags semânticas HTML5
+            4. Layout 100% responsivo com media queries
+            5. Meta tags otimizadas para SEO
+            ---
+            ## Requisitos Técnicos
+            ### Estrutura de Arquivos
+            ```plaintext
+            ├── index.html
+            ├── css/
+            │    └── style.css
+            └── js/
+                └── main.js
+            Regras de Desenvolvimento
+            HTML Semântico:
+
+            Usar <header>, <main>, <section>, <article>, <footer>
+
+            Navegação com <nav> e links âncora suaves
+
+            Cards de projetos com <article> e <figure>
+
+            CSS Moderno:
+
+            Grid/Flexbox para layouts complexos
+
+            Animações CSS para interações
+
+            Media queries para:
+
+            css
+            @media (max-width: 768px) [ /* Mobile */ ]
+            @media (min-width: 1200px) [ /* Desktop XL */ ]
+            JavaScript Limpo:
+
+            Scroll suave nativo
+
+            Modal dinâmico para projetos
+
+            Validação de formulário com regex
+
+            Seções Obrigatórias
+            1. Cabeçalho Fixo
+                Logo com nome do usuário
+                Menu hamburguer mobile
+                Links âncora suaves (Home/Projetos/Contato)
+
+            2. Seção Hero
+                Layout grid 50/50 (texto + avatar)
+                Avatar circular com borda gradiente
+                Botão CTA "Ver Projetos"
+
+            3. Seção Projetos
+                Grid responsivo (3 colunas desktop → 1 mobile)
+                Cards com:
+                    Imagem placeholder (600x400)
+                    Tags de tecnologia
+                    Modal ao clicar (dados via JSON)
+
+            4. Formulário de Contato
+                Campos: Nome (obrigatório), Email (validação), Mensagem
+                Submit com loader CSS
+                Feedback de envio
+             
+            5. SEO e Acessibilidade"""),
             ("human", "{input}"),
             MessagesPlaceholder(variable_name="agent_scratchpad"),
         ])

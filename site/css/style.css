@@ -1,8 +1,10 @@
-/* Estilo geral */
+/* Variáveis CSS */
 :root {
     --primary-color: #2ecc71;
-    --background-color: #f4f4f4;
-    --text-color: #333;
+    --secondary-color: #3498db;
+    --background-color: #ecf0f1;
+    --text-color: #2c3e50;
+    --hover-color: rgba(0, 0, 0, 0.1);
 }
 
 body {
@@ -10,61 +12,48 @@ body {
     margin: 0;
     padding: 0;
     background-color: var(--background-color);
+    color: var(--text-color);
 }
 
 header {
     position: fixed;
-    top: 0;
-    left: 0;
     width: 100%;
     background: white;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    z-index: 1000;
+    z-index: 10;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
 }
 
-.logo {
-    padding: 15px;
-    font-size: 24px;
+header .logo {
+    font-size: 1.5rem;
     font-weight: bold;
 }
 
 nav ul {
     list-style: none;
     display: flex;
-    justify-content: flex-end;
-    padding: 15px;
+    gap: 1rem;
 }
 
-nav ul li {
-    margin-left: 20px;
-}
-
-nav ul li a {
+nav a {
     text-decoration: none;
     color: var(--text-color);
 }
 
-#hero {
+.hero {
     display: grid;
     grid-template-columns: 1fr 1fr;
     align-items: center;
     padding: 100px 20px;
-    text-align: left;
 }
 
-.hero-content {
+.hero-text {
     padding: 20px;
 }
 
-.cta-button {
-    background-color: var(--primary-color);
-    color: white;
-    padding: 10px 20px;
-    text-decoration: none;
-    border-radius: 5px;
-}
-
-.hero-image {
+.hero-avatar {
     display: flex;
     justify-content: center;
 }
@@ -72,26 +61,36 @@ nav ul li a {
 .avatar {
     border-radius: 50%;
     border: 5px solid;
-    border-image: linear-gradient(45deg, var(--primary-color), #fff) 1;
-    width: 150px;
-    height: 150px;
+    border-image: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    border-image-slice: 1;
 }
 
-#projects, #contact {
-    padding: 50px 20px;
+.cta {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.cta:hover {
+    background-color: var(--secondary-color);
 }
 
 .project-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 20px;
+    padding: 20px;
 }
 
 .project-card {
     background: white;
+    border: 1px solid #ddd;
     border-radius: 5px;
     overflow: hidden;
-    transition: transform 0.3s;
+    transition: transform 0.2s;
 }
 
 .project-card:hover {
@@ -99,27 +98,19 @@ nav ul li a {
 }
 
 footer {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
     background: white;
+    padding: 1rem;
     text-align: center;
-    padding: 10px;
+    position: relative;
 }
 
-.social-icons a {
+footer .social-icons a {
     margin: 0 10px;
-    color: var(--text-color);
 }
 
-/* Media queries para responsividade */
+/* Media Queries */
 @media (max-width: 768px) {
-    #hero {
+    .hero {
         grid-template-columns: 1fr;
-        text-align: center;
-    }
-
-    .hero-image {
-        justify-content: center;
     }
 }

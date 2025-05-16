@@ -1,52 +1,35 @@
-// Seleciona o formulário e adiciona um evento de submit
-const contactForm = document.getElementById('contact-form');
+// Seleciona os elementos do formulário
+const form = document.getElementById('contact-form');
+const feedback = document.getElementById('form-feedback');
 
-contactForm.addEventListener('submit', function(event) {
-    event.preventDefault(); // Previne o envio padrão do formulário
+// Adiciona evento de envio ao formulário
+form.addEventListener('submit', function(event) {
+    event.preventDefault(); // Previne o comportamento padrão do formulário
 
     // Simula um envio com setTimeout
     setTimeout(() => {
-        alert('Mensagem enviada com sucesso!');
-        contactForm.reset(); // Reseta o formulário
-    }, 1000);
+        feedback.innerText = 'Mensagem enviada com sucesso!';
+        feedback.style.color = 'green';
+        form.reset(); // Limpa o formulário
+    }, 2000);
 });
 
 // Função para scroll suave
-const smoothScrollLinks = document.querySelectorAll('nav ul li a');
-smoothScrollLinks.forEach(link => {
-    link.addEventListener('click', function(event) {
-        event.preventDefault(); // Previne o comportamento padrão
+const links = document.querySelectorAll('nav a');
+links.forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault(); // Previne o comportamento padrão do link
         const targetId = this.getAttribute('href');
-        document.querySelector(targetId).scrollIntoView({ behavior: 'smooth' });
+        const target = document.querySelector(targetId);
+        target.scrollIntoView({ behavior: 'smooth' }); // Scroll suave
     });
 });
 
-// Modal dinâmico para projetos (exemplo básico)
-const projects = [
-    {
-        title: 'Projeto 1',
-        image: 'https://placehold.co/300x200',
-        tech: ['HTML', 'CSS', 'JavaScript'],
-        description: 'Descrição do Projeto 1'
-    },
-    // Adicione mais projetos aqui
-];
-
-const projectGrid = document.querySelector('.project-grid');
-projects.forEach(project => {
-    const card = document.createElement('div');
-    card.className = 'project-card';
-    card.innerHTML = `
-        <img src="${project.image}" alt="${project.title}">
-        <h3>${project.title}</h3>
-        <div class="project-tech">
-            ${project.tech.map(tech => `<span class="tech-tag">${tech}</span>`).join('')}
-        </div>
-    `;
-
+// Exibir modal dinâmico (exemplo simplificado)
+const projectCards = document.querySelectorAll('.project-card');
+projectCards.forEach(card => {
     card.addEventListener('click', () => {
-        alert(project.description); // Exibe descrição do projeto em um modal
+        // Aqui você pode implementar a lógica para abrir um modal com detalhes do projeto
+        alert('Detalhes do projeto'); // Placeholder
     });
-
-    projectGrid.appendChild(card);
 });

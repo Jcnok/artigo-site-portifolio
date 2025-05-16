@@ -1,15 +1,27 @@
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: site
 name: Deploy to GitHub Pages
 'on':
   push:
     branches:
-      - main
+    - main
+    paths:
+    - site/**
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  TZ: America/Sao_Paulo
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Deploy to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        folder: site
+metadata:
+  version: 1.2.0
+  created_by: AI DevOps Agent
