@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Portfólio de [SEU_NOME] - Desenvolvedor Web">
-    <meta name="keywords" content="HTML, CSS, JavaScript, Portfólio, [SEU_NOME]">
-    <title>Portfólio - [SEU_NOME]</title>
+    <meta name="description" content="Portfólio profissional de [SEU_NOME]">
+    <meta name="keywords" content="portfólio, [SEU_NOME], projetos, habilidades, contato">
+    <title>Portfólio de [SEU_NOME]</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -13,78 +13,96 @@
         <div class="logo">[SEU_NOME]</div>
         <nav>
             <ul>
-                <li><a href="#home">Home</a></li>
+                <li><a href="#hero">Home</a></li>
                 <li><a href="#projetos">Projetos</a></li>
-                <li><a href="#habilidades">Habilidades</a></li>
                 <li><a href="#contato">Contato</a></li>
             </ul>
         </nav>
     </header>
+
     <main>
-        <section id="home" class="hero">
-            <div class="hero-text">
-                <h1>Bem-vindo ao meu portfólio!</h1>
-                <h2>Sou um desenvolvedor apaixonado por criar soluções web.</h2>
+        <section id="hero">
+            <div class="hero-content">
+                <h1>Bem-vindo ao meu portfólio</h1>
+                <p>Sou um desenvolvedor web apaixonado por criar soluções inovadoras.</p>
                 <a href="#projetos" class="cta">Ver Projetos</a>
             </div>
             <div class="hero-avatar">
-                <img src="https://placehold.co/200x200" alt="Avatar de [SEU_NOME]" class="avatar">
+                <img src="https://placehold.co/300x300" alt="Avatar de [SEU_NOME]" class="avatar">
             </div>
         </section>
+
         <section id="projetos">
             <h2>Meus Projetos</h2>
-            <div class="project-grid">
-                <article class="project-card">
+            <div class="projetos-grid">
+                <article class="card" data-modal="modal1">
                     <figure>
                         <img src="https://placehold.co/600x400" alt="Projeto 1">
                         <figcaption>
-                            <h3>Projeto 1</h3>
-                            <span class="tags">React, CSS</span>
+                            <span class="tag">React</span>
+                            <span class="tag">JavaScript</span>
                         </figcaption>
                     </figure>
                 </article>
-                <article class="project-card">
+                <article class="card" data-modal="modal2">
                     <figure>
                         <img src="https://placehold.co/600x400" alt="Projeto 2">
                         <figcaption>
-                            <h3>Projeto 2</h3>
-                            <span class="tags">Python, Flask</span>
+                            <span class="tag">Python</span>
+                            <span class="tag">Django</span>
                         </figcaption>
                     </figure>
                 </article>
-                <article class="project-card">
+                <article class="card" data-modal="modal3">
                     <figure>
                         <img src="https://placehold.co/600x400" alt="Projeto 3">
                         <figcaption>
-                            <h3>Projeto 3</h3>
-                            <span class="tags">JavaScript, Node.js</span>
+                            <span class="tag">HTML</span>
+                            <span class="tag">CSS</span>
                         </figcaption>
                     </figure>
                 </article>
             </div>
         </section>
+
         <section id="contato">
             <h2>Contato</h2>
             <form id="contact-form">
-                <label for="name">Nome:</label>
-                <input type="text" id="name" required>
-                <label for="email">E-mail:</label>
-                <input type="email" id="email" required>
-                <label for="message">Mensagem:</label>
-                <textarea id="message" required></textarea>
-                <button type="submit">Enviar</button>
+                <input type="text" name="nome" placeholder="Seu Nome" required>
+                <input type="email" name="email" placeholder="Seu E-mail" required>
+                <textarea name="mensagem" placeholder="Sua Mensagem" required></textarea>
+                <button type="submit" class="submit">Enviar</button>
             </form>
-            <div id="form-feedback"></div>
+            <div id="feedback"></div>
         </section>
     </main>
+
     <footer>
-        <p>Redes sociais</p>
-        <div class="social-icons">
-            <a href="#"><i class="fab fa-facebook"></i></a>
-            <a href="#"><i class="fab fa-twitter"></i></a>
-            <a href="#"><i class="fab fa-linkedin"></i></a>
-        </div>
+        <p>Redes sociais: <span class="icon"><i class="fab fa-linkedin"></i></span> <span class="icon"><i class="fab fa-github"></i></span></p>
     </footer>
+
+    <div class="modal" id="modal1">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Projeto 1</h2>
+            <p>Descrição do projeto 1.</p>
+        </div>
+    </div>
+    <div class="modal" id="modal2">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Projeto 2</h2>
+            <p>Descrição do projeto 2.</p>
+        </div>
+    </div>
+    <div class="modal" id="modal3">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Projeto 3</h2>
+            <p>Descrição do projeto 3.</p>
+        </div>
+    </div>
+
     <script src="js/main.js"></script>
 </body>
 </html>
