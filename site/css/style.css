@@ -1,110 +1,172 @@
-Claro! Abaixo está um exemplo de CSS que atende aos requisitos que você mencionou. Este código inclui um design responsivo mobile-first, utiliza Flexbox para layout, animações suaves, media queries para dispositivos móveis e estilos básicos de um modelo de referência.
-
-```css
-/* Estilos Globais */
-body {
-    font-family: Arial, sans-serif;
+* {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
-    color: #333;
 }
 
-/* Container principal */
-.container {
+:root {
+    --primary-color: #2ecc71;
+    --secondary-color: #3498db;
+    --background-color: #ecf0f1;
+    --text-color: #2c3e50;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
+    padding: 1rem;
+    z-index: 1000;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+}
+
+nav ul li {
+    margin-left: 20px;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: var(--text-color);
+}
+
+.hero {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     align-items: center;
+    padding: 100px 20px;
+    height: 100vh;
+}
+
+.hero-content {
     padding: 20px;
 }
 
-/* Cabeçalho */
-.header {
-    width: 100%;
-    background-color: #4CAF50;
+.cta {
+    background: var(--primary-color);
     color: white;
-    text-align: center;
-    padding: 15px;
-    animation: fadeIn 1s ease-in-out;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
 }
 
-/* Layout usando Flexbox */
-.main {
+.hero-image {
     display: flex;
-    flex-wrap: wrap;
     justify-content: center;
-    margin: 20px 0;
+}
+
+.avatar {
+    border-radius: 50%;
+    border: 5px solid;
+    border-image: linear-gradient(45deg, #f3ec78, #af4261) 1;
+    width: 200px;
+    height: 200px;
+}
+
+#projetos .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin: 20px;
 }
 
 .card {
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    margin: 10px;
-    padding: 20px;
-    width: 100%;
-    max-width: 300px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s, box-shadow 0.3s;
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: transform 0.3s;
 }
 
 .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-/* Rodapé */
-.footer {
+.tags {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+}
+
+.tag {
+    background: var(--secondary-color);
+    color: white;
+    padding: 5px;
+    border-radius: 5px;
+    margin-right: 5px;
+}
+
+#contato {
+    padding: 20px;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+form input, form textarea {
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid var(--text-color);
+    border-radius: 5px;
+}
+
+button {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
     width: 100%;
+    background: white;
     text-align: center;
     padding: 10px;
-    background-color: #4CAF50;
-    color: white;
-    position: relative;
-    bottom: 0;
 }
 
-/* Animação suave */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
+.social-icons {
+    display: flex;
+    justify-content: center;
 }
 
-/* Media Queries para dispositivos móveis */
-@media (min-width: 600px) {
-    .main {
-        flex-direction: row;
-        justify-content: space-around;
-    }
-
-    .card {
-        width: calc(50% - 20px);
-    }
+.social-icons i {
+    margin: 0 10px;
 }
 
-@media (min-width: 900px) {
-    .card {
-        width: calc(33.33% - 20px);
+/* Media Queries */
+@media (max-width: 768px) {
+    .hero {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+    #projetos .grid {
+        grid-template-columns: 1fr;
     }
 }
-```
-
-### Explicação dos Componentes:
-
-1. **Design Responsivo Mobile-First**: O CSS é estruturado para que os estilos básicos sejam aplicados a dispositivos móveis primeiro. As media queries são usadas para aumentar a complexidade do layout em telas maiores.
-
-2. **Grid/Flexbox Layouts**: O layout principal utiliza Flexbox para organizar as "cards" de forma responsiva. As "cards" se ajustam automaticamente ao tamanho da tela.
-
-3. **Animações Suaves**: A animação `fadeIn` é aplicada ao cabeçalho, e uma animação de transformação é aplicada às "cards" ao passar o mouse sobre elas.
-
-4. **Media Queries para Mobile**: As media queries ajustam o layout e o tamanho das "cards" em telas maiores (600px e 900px).
-
-5. **Estilos do Modelo de Referência**: Os estilos são simples e limpos, com um esquema de cores básico e um layout que pode ser facilmente adaptado.
-
-Sinta-se à vontade para modificar as cores, tamanhos e outros estilos conforme necessário para atender às suas necessidades específicas!
-/* .projects-grid missing */
-/* .hero missing */
+@media (min-width: 768px) and (max-width: 1024px) {
+    #projetos .grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

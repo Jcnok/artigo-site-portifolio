@@ -1,213 +1,84 @@
-Aqui está um exemplo de um portfólio profissional em HTML que atende aos requisitos que você mencionou. O código inclui um header fixo com um menu hambúrguer, uma seção Hero com um layout de grid 50/50, uma seção de Projetos com 3 cards e um formulário de contato válido. Além disso, inclui links para CSS e JS.
-
-### Estrutura de Arquivos
-Para este exemplo, você pode criar os seguintes arquivos:
-
-- `index.html`
-- `styles.css`
-- `script.js`
-
-### Código HTML (`index.html`)
-```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfólio Profissional</title>
-    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="Portfólio de [SEU_NOME] - Desenvolvedor Web">
+    <meta name="keywords" content="Desenvolvedor, Web, Portfolio, [SEU_NOME]">
+    <title>Portfólio - [SEU_NOME]</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<!-- projects-grid missing -->
-<!-- <section class="hero" missing -->
     <header>
-        <div class="menu">
-            <div class="hamburger" onclick="toggleMenu()">☰</div>
-            <nav id="navbar" class="hidden">
-                <ul>
-                    <li><a href="#hero">Início</a></li>
-                    <li><a href="#projects">Projetos</a></li>
-                    <li><a href="#contact">Contato</a></li>
-                </ul>
-            </nav>
-        </div>
+        <div class="logo">[SEU_NOME]</div>
+        <nav>
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#projetos">Projetos</a></li>
+                <li><a href="#habilidades">Habilidades</a></li>
+                <li><a href="#contato">Contato</a></li>
+            </ul>
+        </nav>
     </header>
 
-    <section id="hero" class="hero">
+    <section id="home" class="hero">
         <div class="hero-content">
-            <h1>Bem-vindo ao meu portfólio</h1>
-            <p>Sou um profissional apaixonado por tecnologia e design.</p>
+            <h1>Título Principal</h1>
+            <h2>Subtítulo</h2>
+            <a href="#projetos" class="cta">Ver Projetos</a>
         </div>
         <div class="hero-image">
-            <img src="https://via.placeholder.com/400" alt="Imagem do portfólio">
+            <img src="https://placehold.co/400" alt="Avatar" class="avatar">
         </div>
     </section>
 
-    <section id="projects" class="projects">
+    <section id="projetos">
         <h2>Meus Projetos</h2>
-        <div class="project-cards">
-            <div class="card">
-                <h3>Projeto 1</h3>
-                <p>Descrição do projeto 1.</p>
+        <div class="grid">
+            <!-- Cards de Projetos -->
+            <div class="card" data-modal="Projeto 1">
+                <img src="https://placehold.co/300x200" alt="Projeto 1">
+                <div class="tags">
+                    <span class="tag">React</span>
+                    <span class="tag">Python</span>
+                </div>
             </div>
-            <div class="card">
-                <h3>Projeto 2</h3>
-                <p>Descrição do projeto 2.</p>
+            <div class="card" data-modal="Projeto 2">
+                <img src="https://placehold.co/300x200" alt="Projeto 2">
+                <div class="tags">
+                    <span class="tag">JavaScript</span>
+                    <span class="tag">HTML</span>
+                </div>
             </div>
-            <div class="card">
-                <h3>Projeto 3</h3>
-                <p>Descrição do projeto 3.</p>
+            <div class="card" data-modal="Projeto 3">
+                <img src="https://placehold.co/300x200" alt="Projeto 3">
+                <div class="tags">
+                    <span class="tag">CSS</span>
+                    <span class="tag">Node.js</span>
+                </div>
             </div>
         </div>
     </section>
 
-    <section id="contact" class="contact">
+    <section id="contato">
         <h2>Contato</h2>
-        <form id="contact-form" action="#" method="POST">
-            <label for="name">Nome:</label>
-            <input type="text" id="name" name="name" required>
-
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
-
-            <label for="message">Mensagem:</label>
-            <textarea id="message" name="message" required></textarea>
-
+        <form id="contactForm">
+            <input type="text" name="nome" placeholder="Nome" required>
+            <input type="email" name="email" placeholder="E-mail" required>
+            <textarea name="mensagem" placeholder="Mensagem" required></textarea>
             <button type="submit">Enviar</button>
         </form>
     </section>
 
-    <script src="script.js"></script>
+    <footer>
+        <p>Siga-me nas redes sociais</p>
+        <div class="social-icons">
+            <i class="fab fa-facebook"></i>
+            <i class="fab fa-twitter"></i>
+            <i class="fab fa-linkedin"></i>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
 </body>
 </html>
-```
-
-### Código CSS (`styles.css`)
-```css
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-}
-
-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background-color: #333;
-    color: white;
-    padding: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.menu {
-    display: flex;
-    align-items: center;
-}
-
-.hamburger {
-    cursor: pointer;
-    font-size: 24px;
-}
-
-nav {
-    display: none;
-}
-
-nav ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-nav ul li {
-    display: inline;
-    margin: 0 10px;
-}
-
-nav ul li a {
-    color: white;
-    text-decoration: none;
-}
-
-.hidden {
-    display: none;
-}
-
-.hero {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 100px 20px;
-    background-color: #f4f4f4;
-}
-
-.hero-content {
-    flex: 1;
-}
-
-.hero-image {
-    flex: 1;
-}
-
-.projects {
-    padding: 50px 20px;
-}
-
-.project-cards {
-    display: flex;
-    justify-content: space-between;
-}
-
-.card {
-    border: 1px solid #ccc;
-    padding: 20px;
-    flex: 1;
-    margin: 0 10px;
-}
-
-.contact {
-    padding: 50px 20px;
-}
-
-form {
-    display: flex;
-    flex-direction: column;
-}
-
-form label {
-    margin: 10px 0 5px;
-}
-
-form input, form textarea {
-    padding: 10px;
-    margin-bottom: 10px;
-}
-
-form button {
-    padding: 10px;
-    background-color: #333;
-    color: white;
-    border: none;
-    cursor: pointer;
-}
-```
-
-### Código JavaScript (`script.js`)
-```javascript
-function toggleMenu() {
-    const navbar = document.getElementById('navbar');
-    navbar.classList.toggle('hidden');
-}
-```
-
-### Explicação
-1. **Header Fixo com Menu Hambúrguer**: O header é fixo no topo da página e contém um menu que pode ser mostrado ou escondido ao clicar no ícone de hambúrguer.
-2. **Seção Hero**: A seção hero é dividida em duas partes, uma para o conteúdo e outra para a imagem, utilizando flexbox para o layout 50/50.
-3. **Seção Projetos**: Contém três cards que podem ser preenchidos com informações sobre os projetos.
-4. **Formulário de Contato**: Um formulário simples que inclui validação básica para os campos obrigatórios.
-5. **Links para CSS/JS**: O HTML inclui links para os arquivos CSS e JavaScript.
-
-Você pode personalizar ainda mais o estilo e o conteúdo conforme necessário!
