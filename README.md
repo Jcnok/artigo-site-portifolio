@@ -25,6 +25,7 @@
     - [Execute o Script Principal:](#execute-o-script-principal)
     - [Acesse Seu Portfólio:](#acesse-seu-portfólio)
     - [Faça Alterações e Commite:](#faça-alterações-e-commite)
+  - [📽️ Exemplo de como usar em gif animado:](#️-exemplo-de-como-usar-em-gif-animado)
   - [🤝 Contribuindo](#-contribuindo)
   - [📜 Licença](#-licença)
 
@@ -183,6 +184,12 @@ python src/commit.py  # Detecta mudanças e commita com mensagem semântica!
 [⬆ Voltar ao Índice](#-índice)
 
 ---
+## 📽️ Exemplo de como usar em gif animado:
+
+![Exemplo de uso](img/example-to-use.gif)
+
+[⬆ Voltar ao Índice](#-índice)
+
 
 ## 🤝 Contribuindo
 
